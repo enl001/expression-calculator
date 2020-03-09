@@ -4,95 +4,74 @@ function eval() {
 }
 
 function expressionCalculator(expr) {
-    let operations = [];
-    let values = [];
-    expr = expr.replace(/' '/g,'');
-    for(let e of expr){
-        switch (e) {
+  
+  expr = expr.replace(/\s+/g,'');  
 
-        }
+  let openCounter = 0;
+  let closeCounter = 0;
+  let oper = ['*','/','-','+','(',')'];
+  let arr = [];
+  let value = '';
+  for(let s of expr){
+    if(!oper.includes(s)) {
+      value+=s;
     }
+    else 
+    {
+      if (value.length>0) arr.push(parseFloat(value));
+      value ='';
+      arr.push(s);
+      if (s=='(') openCounter++;
+      if (s==')') closeCounter++;
+    }
+  }
+  arr.push(parseFloat(value)); 
 
+  if (openCounter!=closeCounter) throw "ExpressionError: Brackets must be paired";
+
+  let open = arr.lastIndexOf('(');
+  while(open>=0){
+    let close = open + arr.slice(open+1).indexOf(')') +1;
+    if (close>0) {
+      arr.splice(open, close-open+1, calculate(arr.slice(open+1, close)));
+    }
+    open = arr.lastIndexOf('(');
+  }  
+  return calculate(arr);
+}
+
+function calculate (arr)
+{
+let oper = ['/','*','-','+'];  
+for (let o of oper){  
+  let ind = arr.indexOf(o);
+  let res = 0;
+  while(ind >=0)
+  {    
+    switch (o)
+    {
+      case '*':
+        res = arr[ind-1] * arr[ind+1];        
+      break;
+      case '/':
+        if (arr[ind+1]==0) throw "TypeError: Division by zero.";
+        res = arr[ind-1] / arr[ind+1];        
+      break;
+      case '-':
+        res = arr[ind-1] - arr[ind+1];        
+      break;
+      case '+':
+        res = arr[ind-1] + arr[ind+1];        
+      break;
+    }
+    arr.splice(ind-1,3,res);    
+    ind = arr.indexOf(o);
+  }  
+}
+return arr[0];
 }
 
 module.exports = {
     expressionCalculator
 }
 
-function expressionCalculator(expr) {
-    let operations = [];
-    let values = [];
-    console.log(expr);
-    let exprToCalc = expr.replace(/\s+/g,'');
-
-
-    console.log(exprToCalc);
-    let value = '';
-    for(let e of exprToCalc){
-      
-        switch (e) {          
-          case ')':
-            if (value.length>0) {
-              values.push(parseFloat(value));
-              value = '';
-            }           
-            values.push(calculate(operations, values));            
-          break;
-          case '(':            
-            //value = '';            
-          break;
-          case '+':
-            operations.push(e);
-            if (value.length>0) {
-              values.push(parseFloat(value));
-              value = '';
-            }
-          break;
-          case '-':
-            operations.push(e);
-            if (value.length>0) {
-              values.push(parseFloat(value));
-              value = '';
-            }
-          break;
-          case '/':
-            operations.push(e);
-            if (value.length>0) {
-              values.push(parseFloat(value));
-              value = '';
-            }
-          break;
-          case '*':
-            operations.push(e);
-            if (value.length>0) {
-              values.push(parseFloat(value));
-              value = '';
-            }
-          break;
-          default:
-            value+=e;
-          break
-        }       
-    }
-    return values.pop();
-}
-
-function calculate(operations,values){  
-  let value = parseFloat(values.pop());
-  switch (operations.pop()){
-    case '+':
-      value = parseFloat(values.pop()) + value;
-    break;
-    case '-':
-      value = parseFloat(values.pop()) - value;
-    break;
-    case '/':
-      value = parseFloat(values.pop()) / value;
-    break;
-    case '*':
-      value = parseFloat(values.pop()) * value;
-    break;    
-  }  
-  return value;
-}
-console.log(expressionCalculator("   100 - 60 / 38)) +   19 / 88) * 97) / 82 )/ 94  ) * 92 )) "));
